@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresdb-sts
+  namespace: postgresdb-sts-ns
+spec:
+  serviceName: postgresdb-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      db: postgresdb
+  template:
+    metadata:
+      labels:
+        db: postgresdb
+    spec:
+      containers:
+      - name: postgresdb
+        image: postgres:17
+        ports:
+        - containerPort: 5432
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+        - name: postgres-vol
+          mountPath: /var/lib/postgressql/data
+      volumes:
+      - name: postgres-vol
+        persistentVolumeClaim:
+          claimName: ebs-pvc
