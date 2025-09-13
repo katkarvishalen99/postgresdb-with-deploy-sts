@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresdb-deploy
+  namespace: postgresdb-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      db: postgresdb
+  template:
+    metadata:
+      labels:
+        db: postgresdb
+    spec:
+      containers:
+        - name: postgresdb
+          image: postgres:17-alpine
+          envFrom:
+            - configMapRef:
+                name: db-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: dbdata
+      volumes:
+        - name: dbdata
+          hostPath:
+            path: /mnt/data
